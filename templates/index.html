@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Blog Yazıları</h2>
+  <ul>
+    {% for post in posts %}
+      <li><a href="{{ url_for('post', post_id=loop.index0) }}">{{ post.title }}</a></li>
+    {% else %}
+      <p>Henüz yazı yok.</p>
+    {% endfor %}
+  </ul>
+  <a href="{{ url_for('new_post') }}">Yeni Yazı</a>
+{% endblock %}

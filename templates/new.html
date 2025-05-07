@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Yeni Yazı</h2>
+  <form method="post">
+    <label>Başlık: <input type="text" name="title" required></label><br><br>
+    <label>İçerik: <textarea name="content" required></textarea></label><br><br>
+    <button type="submit">Gönder</button>
+  </form>
+{% endblock %}
