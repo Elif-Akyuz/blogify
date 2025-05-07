@@ -44,4 +44,5 @@ jobs:
 
       - name: Deploy via PythonAnywhere API (Alternative Method for No SSH Access)
         run: |
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/reloaded_web_app/?api_key=${{ secrets.PA_API_TOKEN }}"
+          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_WEBAPP_NAME }}/reload/?api_key=${{ secrets.PA_API_TOKEN }}"
+
