@@ -26,7 +26,8 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: pytest
+        run: |
+          python -m pytest
 
   deploy:
     name: Deploy to PythonAnywhere
