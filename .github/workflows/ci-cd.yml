@@ -27,7 +27,8 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest
+          export PYTHONPATH=.
+          pytest
 
   deploy:
     name: Deploy to PythonAnywhere
