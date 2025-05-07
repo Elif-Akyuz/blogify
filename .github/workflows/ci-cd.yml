@@ -51,12 +51,11 @@ jobs:
           PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         run: |
           pa_authtoken=$(python -c "import os; print(os.environ['PA_API_TOKEN'])")
-<<<<<<< HEAD
-          python -m pythonanywhere.deploy \
+          pa deploy \
             --username $PA_USERNAME \
-            --api_token $pa_authtoken \
+            --api-token $pa_authtoken \
             --path . \
-            --site_domain "$PA_USERNAME.pythonanywhere.com"
+            --domain "$PA_USERNAME.pythonanywhere.com"
 
       - name: Reload web app
         run: |
@@ -65,4 +64,3 @@ jobs:
             --username $PA_USERNAME \
             --api_token $pa_authtoken \
             --site_domain "$PA_USERNAME.pythonanywhere.com"
-
