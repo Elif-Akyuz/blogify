@@ -50,10 +50,9 @@ jobs:
           PA_USERNAME: ${{ secrets.PA_USERNAME }}
           PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         run: |
-          echo "Uploading to PythonAnywhere..."
           pa_authtoken=$(python -c "import os; print(os.environ['PA_API_TOKEN'])")
-          python -m pythonanywhere.deploy \
-            --username $PA_USERNAME \
-            --api_token $pa_authtoken \
-            --path . \
-            --site_domain "$PA_USERNAME.pythonanywhere.com"
+          pa deploy \
+           --username $PA_USERNAME \
+          --api-token $pa_authtoken \
+          --path . \
+          --domain $PA_USERNAME.pythonanywhere.com
