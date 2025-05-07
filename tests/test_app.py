@@ -9,6 +9,8 @@ def test_index():
     tester = app.test_client()
     response = tester.get('/')
     assert response.status_code == 200
-    assert b'Hen\xfcz yaz\xc4\xb1 yok' in response.data  # "Henüz yazı yok" mesajını kontrol et
+    html = response.data.decode('utf-8')
+    assert 'Henüz yazı yok' in html  # daha güvenilir ve okunabilir
+
 
 
