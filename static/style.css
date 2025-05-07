@@ -1,11 +1,69 @@
+/* Genel Stil Ayarları */
 body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
+  font-family: 'Arial', sans-serif;  /* Font ailesi */
+  line-height: 1.6;                  /* Satır aralığı */
+  background-color: #f4f4f4;         /* Arka plan rengi */
+  color: #333;                       /* Yazı rengi */
+  max-width: 800px;                   /* Maksimum genişlik */
+  margin: 0 auto;                     /* Ortalanmış içerik */
+  padding: 20px;
+  box-sizing: border-box;             /* Box modelinin düzgün çalışması için */
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;                /* Başlık altındaki boşluk */
+  background-color: #3498db;          /* Başlık arka plan rengi */
+  color: white;                       /* Başlık yazı rengi */
+  padding: 20px;
+  border-radius: 8px;                 /* Yuvarlatılmış köşeler */
+}
+
+header h1 {
+  font-size: 2.5rem;                  /* Başlık boyutu */
+  margin: 0;                           /* Başlık altındaki boşluğu sıfırlama */
+  text-transform: uppercase;           /* Büyük harf kullanma */
+}
+
+main {
+  background-color: white;            /* İçerik alanının beyaz arka planı */
+  padding: 20px;
+  border-radius: 8px;                 /* Yuvarlatılmış köşeler */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge efekti */
+}
+
+h2 {
+  font-size: 1.8rem;                  /* Alt başlık boyutu */
+  color: #2c3e50;                     /* Başlık rengi */
+}
+
+p {
+  font-size: 1rem;                    /* Paragraf yazı boyutu */
+  line-height: 1.8;                   /* Satır yüksekliği */
+  color: #555;                        /* Paragraf yazı rengi */
+  margin-bottom: 20px;                 /* Paragraflar arası boşluk */
+}
+
+a {
+  color: #3498db;                     /* Link rengi */
+  text-decoration: none;               /* Alt çizgi kaldırma */
+}
+
+a:hover {
+  text-decoration: underline;         /* Link üzerine gelindiğinde alt çizgi */
+}
+
+/* Mobil uyumlu tasarım için media query */
+@media screen and (max-width: 768px) {
+  body {
+      padding: 10px;                  /* Mobilde daha az padding */
   }
-  header {
-    text-align: center;
-    margin-bottom: 30px;
+
+  header h1 {
+      font-size: 2rem;                /* Başlık boyutu daha küçük */
   }
-  
+
+  main {
+      padding: 15px;                  /* İçerik alanı paddingi */
+  }
+}

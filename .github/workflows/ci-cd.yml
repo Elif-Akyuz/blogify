@@ -57,3 +57,11 @@ jobs:
             --api_token $pa_authtoken \
             --path . \
             --site_domain "$PA_USERNAME.pythonanywhere.com"
+
+      - name: Reload web app
+        run: |
+          echo "Reloading web app to apply changes..."
+          python -m pythonanywhere.reloader \
+            --username $PA_USERNAME \
+            --api_token $pa_authtoken \
+            --site_domain "$PA_USERNAME.pythonanywhere.com"
