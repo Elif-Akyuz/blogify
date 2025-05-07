@@ -28,25 +28,20 @@ jobs:
       - name: Run tests
         run: pytest
 
-  deploy:
+deploy:
     name: Deploy to PythonAnywhere
     needs: test
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH into PythonAnywhere and deploy
-        env:
-          PA_USERNAME: ${{ secrets.PA_USERNAME }}
-          PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
-          PA_PASSWORD: ${{ secrets.PA_PASSWORD }} # Eğer SSH kullanıyorsan parola değil SSH key önerilir.
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.PA_USERNAME }}@ssh.pythonanywhere.com "
-            cd /home/${{ secrets.PA_USERNAME }}/blogify &&
-            git pull origin main &&
-            workon blogify &&
-            touch /var/www/${{ secrets.PA_USERNAME }}_pythonanywhere_com_wsgi.py
-          "
 
+      - name: Deploy via PythonAnywhere API (Alternative Method for No SSH Access)
+        run: |
+          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/reloaded_web_app/?api_key=${{ secrets.PA_API_TOKEN }}"
