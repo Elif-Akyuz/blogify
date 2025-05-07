@@ -25,10 +25,8 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Set PYTHONPATH and run tests
-        run: |
-          export PYTHONPATH=blogify
-          pytest
+      - name: Run tests
+        run: pytest
 
   deploy:
     name: Deploy to PythonAnywhere
@@ -53,11 +51,11 @@ jobs:
           PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
         run: |
           pa_authtoken=$(python -c "import os; print(os.environ['PA_API_TOKEN'])")
-          python -m pythonanywhere.deploy \
+          pa deploy \
             --username $PA_USERNAME \
-            --api_token $pa_authtoken \
+            --api-token $pa_authtoken \
             --path . \
-            --site_domain "$PA_USERNAME.pythonanywhere.com"
+            --domain "$PA_USERNAME.pythonanywhere.com"
 
       - name: Reload web app
         run: |
