@@ -1,1 +1,14 @@
 Flask==2.2.0
+Werkzeug==2.2.0
+Jinja2>=3.0
+Itsdangerous>=2.0
+Click>=8.0
+pytest==8.3.5
+pytest-flask==1.2.0
+Flask-SQLAlchemy==2.5.1  # Eğer SQLAlchemy kullanıyorsanız
+Flask-WTF==1.0.1  # Eğer form kullanıyorsanız
+Flask-Login==0.6.2  # Eğer kullanıcı yönetimi kullanıyorsanız
+Flask-Cors==3.0.10  # Eğer CORS kullanıyorsanız
+requests==2.28.1  # Eğer HTTP istekleri yapıyorsanız
+gunicorn==20.1.0  # Eğer üretim sunucusu olarak kullanıyorsanız
+Flask-Mail==0.9.1  # Eğer e-posta göndermek istiyorsanız
