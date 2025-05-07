@@ -28,9 +28,9 @@ jobs:
       - name: Run tests
         run: pytest
 
-deploy:
+  deploy:
     name: Deploy to PythonAnywhere
-    needs: test
+    needs: test  # This means it will only run after the test job is successful
     runs-on: ubuntu-latest
 
     steps:
