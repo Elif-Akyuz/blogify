@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Blogify
+name: CI Pipeline for Blogify
 
 on:
   push:
@@ -27,22 +27,3 @@ jobs:
 
       - name: Run tests
         run: pytest
-
-  deploy:
-    name: Deploy to PythonAnywhere
-    needs: test  # This means it will only run after the test job is successful
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up SSH
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
-
-      - name: Deploy via PythonAnywhere API (Alternative Method for No SSH Access)
-        run: |
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_WEBAPP_NAME }}/reload/?api_key=${{ secrets.PA_API_TOKEN }}"
-
