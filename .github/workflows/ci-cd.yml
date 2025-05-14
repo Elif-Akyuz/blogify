@@ -76,6 +76,9 @@ jobs:
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
           fi
 
+          echo "Waiting for service to warm up..."
+          sleep 40
+
   healthcheck:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
