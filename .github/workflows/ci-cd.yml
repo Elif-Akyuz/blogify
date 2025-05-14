@@ -18,16 +18,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -48,31 +45,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    environment:
-      name: ${{ github.event.inputs.branch == 'main' || github.ref_name == 'main' && 'production' || 'staging' }}
-      url: ${{ github.ref_name == 'main' && 'https://blogify-prod.onrender.com' || 'https://blogify-staging.onrender.com' }}
     steps:
-      - name: Set Branch Variable
-        id: vars
+      - id: vars
         run: echo "branch=${{ github.event.inputs.branch || github.ref_name }}" >> $GITHUB_OUTPUT
 
-      - name: Validate Deployment Hooks
+      - name: Validate Deployment Hook
         run: |
           BRANCH="${{ steps.vars.outputs.branch }}"
-          if [[ "$BRANCH" == "main" && -z "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}" ]]; then
-            echo "Missing production hook"; exit 1
-          elif [[ "$BRANCH" == "develop" && -z "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}" ]]; then
-            echo "Missing staging hook"; exit 1
-          fi
+          [[ "$BRANCH" == "main" && -z "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}" ]] && { echo "Missing production hook"; exit 1; }
+          [[ "$BRANCH" == "develop" && -z "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}" ]] && { echo "Missing staging hook"; exit 1; }
 
       - name: Deploying...
         run: |
           BRANCH="${{ steps.vars.outputs.branch }}"
           if [[ "$BRANCH" == "main" ]]; then
-            echo "Deploying to PRODUCTION"
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}"
-          elif [[ "$BRANCH" == "develop" ]]; then
-            echo "Deploying to STAGING"
+          else
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
           fi
 
@@ -80,64 +68,58 @@ jobs:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
     needs: deploy
-    continue-on-error: true   # ❗️Hata olsa bile devam etsin
     outputs:
       healthy: ${{ steps.check.outputs.healthy }}
     steps:
-      - name: Set Branch Variable
-        id: vars
+      - id: vars
         run: echo "branch=${{ github.event.inputs.branch || github.ref_name }}" >> $GITHUB_OUTPUT
 
-      - name: Check Service Health
-        id: check
-        continue-on-error: true
+      - id: check
         run: |
           BRANCH="${{ steps.vars.outputs.branch }}"
-          if [[ "$BRANCH" == "main" ]]; then
-            URL="https://blogify-prod.onrender.com/health"
-          elif [[ "$BRANCH" == "develop" ]]; then
-            URL="https://blogify-staging.onrender.com/health"
-          else
-            echo "No healthcheck URL for branch: $BRANCH"; exit 1
-          fi
+          URL="https://blogify-${BRANCH == 'main' && 'prod' || 'staging'}.onrender.com/health"
 
-          echo "Waiting for service to warm up..."
+          echo "Waiting for service..."
           sleep 40
 
-          echo "Checking service at $URL..."
-          code=$(curl --write-out '%{http_code}' --silent --output /dev/null $URL)
+          STATUS=$(curl --write-out '%{http_code}' --silent --output /dev/null $URL)
+          echo "HTTP status: $STATUS"
 
-          if [[ "$code" == "200" ]]; then
+          if [[ "$STATUS" == "200" ]]; then
             echo "healthy=true" >> $GITHUB_OUTPUT
-            echo "Service is healthy ✅"
+            echo "✅ Healthy"
           else
             echo "healthy=false" >> $GITHUB_OUTPUT
-            echo "Service healthcheck failed ❌"
+            echo "❌ Healthcheck failed"
             exit 1
           fi
 
   rollback:
-    name: Rollback Last Commit
+    name: Rollback on Failure
     runs-on: ubuntu-latest
     needs: healthcheck
-    if: needs.healthcheck.outputs.healthy == 'false'   # ❗️String karşılaştırma önemli
+    if: needs.healthcheck.outputs.healthy == 'false'
     outputs:
       rolled_back: ${{ steps.revert.outputs.rolled_back }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Revert Last Commit
-        id: revert
+      - id: revert
         run: |
           echo "Rolling back last commit..."
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          if ! git revert --no-edit HEAD; then
-            echo "Rollback failed ❌"; exit 1
+          # Optional: Reset to a known good commit from a file
+          if [[ -f .last-good-commit ]]; then
+            COMMIT=$(cat .last-good-commit)
+            echo "Resetting to known good commit: $COMMIT"
+            git reset --hard "$COMMIT"
+          else
+            echo "No known good commit found. Reverting last commit."
+            git revert --no-edit HEAD
           fi
 
           git push origin HEAD:${GITHUB_REF#refs/heads/}
@@ -149,19 +131,16 @@ jobs:
     needs: rollback
     if: needs.rollback.outputs.rolled_back == 'true'
     steps:
-      - name: Set Branch Variable
-        id: vars
+      - id: vars
         run: echo "branch=${{ github.event.inputs.branch || github.ref_name }}" >> $GITHUB_OUTPUT
 
-      - name: Re-deploying After Rollback
+      - name: Re-deploying...
         run: |
           BRANCH="${{ steps.vars.outputs.branch }}"
           if [[ "$BRANCH" == "main" ]]; then
-            echo "Re-deploying to PRODUCTION..."
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}"
           elif [[ "$BRANCH" == "develop" ]]; then
-            echo "Re-deploying to STAGING..."
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
           else
-            echo "No redeploy target. Skipping."
+            echo "Unknown branch: $BRANCH"
           fi
