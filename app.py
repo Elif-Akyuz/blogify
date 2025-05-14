@@ -10,7 +10,7 @@ def index():
 
 @app.route('/health')
 def health():
-    return 'OK', 200
+    raise Exception("Crash test")
 
 @app.route('/post/<int:post_id>')
 def post(post_id):
