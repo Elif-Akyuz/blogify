@@ -8,9 +8,7 @@ posts = []
 def index():
     return render_template("index.html", posts=posts)
 
-@app.route("/health")
-def health():
-    return "Not OK", 500
+
 
 
 @app.route('/post/<int:post_id>')
