@@ -1,0 +1,93 @@
+# Blogify CI/CD Pipeline
+
+Bu doküman, Blogify projesi için oluşturulan CI/CD iş akışını açıklamaktadır. İş akışı, kodun test edilmesi, dağıtılması, sağlık kontrolü yapılması ve gerektiğinde rollback işlemlerini içermektedir.
+
+## İş Akışı Adımları
+
+### 1. **Test (Run Tests)**
+- **Amaç:** Kodun doğru çalıştığından emin olmak için testleri çalıştırır.
+- **Tetiklenme Durumları:**
+  - `main` veya `develop` branch'lerine yapılan `push` işlemleri.
+  - `main` veya `develop` branch'lerine yapılan `pull_request` işlemleri.
+- **Adımlar:**
+  1. Kod deposunu klonlar.
+  2. Python 3.10'u kurar.
+  3. `pip` bağımlılıklarını önbelleğe alır.
+  4. Gerekli bağımlılıkları yükler.
+  5. `pytest` ile testleri çalıştırır.
+
+---
+
+### 2. **Dağıtım (Deploy to Render)**
+- **Amaç:** Testler başarılı olduktan sonra kodu `Render` platformuna dağıtır.
+- **Tetiklenme Durumları:**
+  - `main` branch'ine yapılan `push` işlemi → **Production** ortamına dağıtım.
+  - `develop` branch'ine yapılan `push` işlemi → **Staging** ortamına dağıtım.
+- **Adımlar:**
+  1. Dağıtım için gerekli olan `RENDER_DEPLOY_HOOK_PROD` ve `RENDER_DEPLOY_HOOK_STAGING` gizli anahtarlarının varlığını doğrular.
+  2. Branch'e göre uygun dağıtım URL'sine `POST` isteği gönderir.
+
+---
+
+### 3. **Sağlık Kontrolü (Post-Deploy Health Check)**
+- **Amaç:** Dağıtım sonrası servisin sağlıklı çalışıp çalışmadığını kontrol eder.
+- **Tetiklenme Durumları:**
+  - Dağıtım adımının tamamlanması.
+- **Adımlar:**
+  1. Branch'e göre uygun sağlık kontrolü URL'sini belirler.
+  2. `curl` ile URL'yi kontrol eder.
+  3. HTTP 200 yanıtı alırsa servisin sağlıklı olduğunu bildirir, aksi takdirde başarısız olur.
+
+---
+
+### 4. **Rollback (Rollback Last Commit)**
+- **Amaç:** Sağlık kontrolü başarısız olursa son commit'i geri alır.
+- **Tetiklenme Durumları:**
+  - Sağlık kontrolü adımının başarısız olması.
+- **Adımlar:**
+  1. Kod deposunu klonlar.
+  2. Son commit'i geri alır.
+  3. Geri alınan değişiklikleri branch'e `push` eder.
+
+---
+
+### 5. **Yeniden Dağıtım (Re-Deploy After Rollback)**
+- **Amaç:** Rollback işleminden sonra kodu yeniden dağıtır.
+- **Tetiklenme Durumları:**
+  - Rollback işleminin başarılı olması.
+- **Adımlar:**
+  1. Branch'e göre uygun dağıtım URL'sine `POST` isteği gönderir.
+
+---
+
+## Manuel Tetikleme
+- İş akışı manuel olarak da tetiklenebilir.
+- **Parametreler:**
+  - `branch`: Dağıtım yapılacak branch (`main` veya `develop`).
+
+---
+
+## Gizli Anahtarlar
+- **`RENDER_DEPLOY_HOOK_PROD`:** Production ortamı için dağıtım URL'si.
+- **`RENDER_DEPLOY_HOOK_STAGING`:** Staging ortamı için dağıtım URL'si.
+- **`GITHUB_TOKEN`:** Rollback işlemi sırasında gerekli olan erişim anahtarı.
+
+---
+
+## Önemli Notlar
+- Sağlık kontrolü başarısız olursa rollback işlemi otomatik olarak devreye girer.
+- Rollback sonrası kod yeniden dağıtılır.
+- `pytest` testlerinin başarısız olması durumunda dağıtım yapılmaz.
+
+---
+
+## İş Akışını Manuel Tetikleme
+GitHub Actions üzerinden manuel olarak iş akışını tetiklemek için:
+1. GitHub deposuna gidin.
+2. **Actions** sekmesine tıklayın.
+3. **Blogify CI/CD Pipeline** iş akışını seçin.
+4. **Run workflow** butonuna tıklayın ve gerekli parametreleri girin.
+
+---
+
+Bu iş akışı, Blogify projesinin güvenli ve otomatik bir şekilde dağıtılmasını sağlar.

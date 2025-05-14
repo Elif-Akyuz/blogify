@@ -10,6 +10,11 @@ on:
       - main
       - develop
   workflow_dispatch:   # Manuel tetikleme
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
 
 jobs:
   test:
@@ -32,15 +37,27 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      - name: Log Cache Status
+        run: |
+          if [ -d ~/.cache/pip ]; then
+            echo "Cache restored successfully ✅"
+          else
+            echo "Cache not found, dependencies will be installed from scratch ❌"
+          fi
                     
       - name: Install Dependencies
         run: |
+          echo "Starting dependency installation..."
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+          echo "Dependencies installed successfully ✅"
 
       - name: Run Tests
-        run: pytest
+        run: |
+          echo "Running tests..."
+          pytest
+          echo "Tests completed ✅"
 
   deploy:
     name: Deploy to Render
@@ -48,6 +65,12 @@ jobs:
     needs: test
     if: github.event_name == 'push'
     steps:
+      - name: Validate Deployment Hooks
+        run: |
+          if [[ -z "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}" || -z "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}" ]]; then
+            echo "Deployment hooks are not set"; exit 1
+          fi
+
       - name: Deploying...
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -63,7 +86,7 @@ jobs:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
     needs: deploy
-    continue-on-error: true
+    continue-on-error: false
     outputs:
       healthy: ${{ steps.check.outputs.healthy }}
     steps:
@@ -109,9 +132,11 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          git revert --no-edit HEAD || echo "No commit to revert"
-          git push origin HEAD:${GITHUB_REF#refs/heads/}
+          if ! git revert --no-edit HEAD; then
+            echo "Rollback failed: No commit to revert or an error occurred ❌"; exit 1
+          fi
 
+          git push origin HEAD:${GITHUB_REF#refs/heads/}
           echo "rolled_back=true" >> $GITHUB_OUTPUT
 
   redeploy:
@@ -123,10 +148,11 @@ jobs:
       - name: Re-deploying After Rollback
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "Re-deploying to PRODUCTION after rollback"
+            echo "Re-deploying to PRODUCTION after rollback..."
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}"
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "Re-deploying to STAGING after rollback"
+            echo "Re-deploying to STAGING after rollback..."
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
           else
-            echo "No redeploy target."
+            echo "No redeploy target. Skipping redeployment."
+          fi
