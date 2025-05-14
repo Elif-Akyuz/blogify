@@ -79,7 +79,7 @@ jobs:
           fi
 
           echo "Waiting for service to warm up..."
-          sleep 30
+          sleep 40
 
   healthcheck:
     name: Post-Deploy Health Check
@@ -125,7 +125,7 @@ jobs:
     name: Rollback Last Commit
     runs-on: ubuntu-latest
     needs: healthcheck
-    if: needs.healthcheck.outputs.healthy == 'false'
+    if: needs.healthcheck.result == 'failure'
     outputs:
       rolled_back: ${{ steps.revert.outputs.rolled_back }}
     steps:
