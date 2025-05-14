@@ -164,3 +164,4 @@ jobs:
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
           else
             echo "No redeploy target. Skipping."
+          fi
