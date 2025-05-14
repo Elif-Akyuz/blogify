@@ -94,7 +94,7 @@ jobs:
           fi
           
           echo "Waiting for service to warm up..."
-          sleep 15
+          sleep 30
 
 
   healthcheck:
@@ -119,7 +119,7 @@ jobs:
           fi
 
           echo "Waiting for service to warm up..."
-          sleep 15
+          sleep 40
 
           echo "Checking service at $URL..."
           code=$(curl --write-out '%{http_code}' --silent --output /dev/null $URL)
