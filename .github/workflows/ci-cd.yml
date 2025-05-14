@@ -124,6 +124,7 @@ jobs:
             echo "healthy=false" >> $GITHUB_OUTPUT
             echo "Service healthcheck failed ❌"
             exit 1
+          fi
 
   rollback:
     name: Rollback Last Commit
