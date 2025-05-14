@@ -10,7 +10,7 @@ def index():
 
 @app.route("/health")
 def health():
-    return "OK", 200
+    return "Not OK", 500
 
 
 @app.route('/post/<int:post_id>')
