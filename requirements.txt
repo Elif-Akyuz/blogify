@@ -6,6 +6,7 @@ Click>=8.0
 pytest==8.3.5
 pytest-flask==1.2.0
 pytest-html==3.2.0
+flake8
 Flask-SQLAlchemy==2.5.1  # Eğer SQLAlchemy kullanıyorsanız
 Flask-WTF==1.0.1  # Eğer form kullanıyorsanız
 Flask-Login==0.6.2  # Eğer kullanıcı yönetimi kullanıyorsanız
