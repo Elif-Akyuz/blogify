@@ -17,9 +17,4 @@ activate_this = os.path.join(virtualenv_path, 'bin/activate_this.py')
 exec(open(activate_this).read(), dict(__file__=activate_this))
 
 if __name__ == "__main__":
-    app.run()
-
-
-
-
-
+    application.run()  # Burada app yerine application olmalı

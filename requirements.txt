@@ -5,7 +5,8 @@ Itsdangerous>=2.0
 Click>=8.0
 pytest==8.3.5
 pytest-flask==1.2.0
-pytest-html==3.2.0
+pytest-html
+pytest-cov
 flake8
 Flask-SQLAlchemy==2.5.1  # Eğer SQLAlchemy kullanıyorsanız
 Flask-WTF==1.0.1  # Eğer form kullanıyorsanız
