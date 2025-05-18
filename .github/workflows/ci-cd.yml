@@ -107,7 +107,7 @@ jobs:
           echo "Waiting for service to warm up..."
           sleep 40
 
-  healthcheck:
+    healthcheck:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
     needs: deploy
@@ -117,7 +117,7 @@ jobs:
         id: vars
         run: echo "branch=${{ github.event.inputs.branch || github.ref_name }}" >> $GITHUB_OUTPUT
 
-      - name: Check Service Health
+      - name: Check Service Health with Retry
         run: |
           BRANCH="${{ steps.vars.outputs.branch }}"
           if [[ "$BRANCH" == "main" ]]; then
@@ -128,15 +128,18 @@ jobs:
             echo "No healthcheck URL configured for branch: $BRANCH"; exit 1
           fi
 
-          echo "Waiting for service to warm up..."
-          sleep 40
+          echo "Checking service at $URL with retry..."
+          for i in {1..5}; do
+            status_code=$(curl --write-out '%{http_code}' --silent --output /dev/null "$URL")
+            if [[ "$status_code" == "200" ]]; then
+              echo "✅ Service is healthy"
+              exit 0
+            else
+              echo "❌ Attempt $i failed (status: $status_code). Retrying in 20s..."
+              sleep 20
+            fi
+          done
 
-          echo "Checking service at $URL..."
-          status_code=$(curl --write-out '%{http_code}' --silent --output /dev/null "$URL")
+          echo "Service healthcheck failed after multiple attempts ❌"
+          exit 1
 
-          if [[ "$status_code" == "200" ]]; then
-            echo "Service is healthy ✅"
-          else
-            echo "Service healthcheck failed with status $status_code ❌"
-            exit 1
-          fi
