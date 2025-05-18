@@ -1,23 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for
 
-app = Flask(__name__)  # "__name__" değil **name** yazmışsın, düzeltildi
+
+app = Flask(__name__)  # __name__ doğru şekilde yazıldı
+
 
 posts = []
+
 
 @app.route('/')
 def index():
     return render_template("index.html", posts=posts)
 
+
 @app.route('/health')
 def health():
     return 'OK', 200
 
-@app.route('/post/<int:post_id>')  # route ifadesinde hatalı bir regex kullanımı var
+
+@app.route('/post/<int:post_id>')
 def post(post_id):
     try:
         return render_template("post.html", post=posts[post_id])
     except IndexError:
         return "Post not found", 404
+
 
 @app.route('/new', methods=["GET", "POST"])
 def new_post():
