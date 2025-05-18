@@ -37,7 +37,7 @@ def test_post_view():
         follow_redirects=False
     )
 
-    location = response.headers['Location']  # /post/0 gibi
+    location = response.headers['Location']  
     post_id = location.split('/post/')[-1]
 
     response = tester.get(f'/post/{post_id}')
