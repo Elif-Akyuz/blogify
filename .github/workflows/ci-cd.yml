@@ -64,6 +64,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           pytest --cov=app --cov-report=term-missing
 
   deploy:
