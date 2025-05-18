@@ -1,5 +1,6 @@
 import sys
 import os
+from app import app as application
 
 # Path to your virtual environment
 virtualenv_path = '/home/elifakyuz/.virtualenvs/myenv'
@@ -15,4 +16,10 @@ if project_home not in sys.path:
 activate_this = os.path.join(virtualenv_path, 'bin/activate_this.py')
 exec(open(activate_this).read(), dict(__file__=activate_this))
 
-from app import app as application
+if __name__ == "__main__":
+    app.run()
+
+
+
+
+
