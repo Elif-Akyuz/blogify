@@ -104,6 +104,9 @@ jobs:
             echo "Branch $BRANCH is not configured for deployment"; exit 1
           fi
 
+          echo "Waiting for service to warm up..."
+          sleep 40
+
   healthcheck:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
@@ -139,3 +142,4 @@ jobs:
 
           echo "Service healthcheck failed after multiple attempts ❌"
           exit 1
+
