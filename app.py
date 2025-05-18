@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 
-
-app = Flask(__name__) # Flask
+app = Flask(__name__)  # Flask
 
 posts = []
 
@@ -9,8 +8,11 @@ posts = []
 @app.route('/')
 def index():
     if not posts:
-        return render_template("index.html", posts=posts,
-                          message="Henüz yazı yok")
+        return render_template(
+            "index.html",
+            posts=posts,
+            message="Henüz yazı yok"
+        )
     return render_template("index.html", posts=posts)
 
 
@@ -36,4 +38,3 @@ def new_post():
         post_id = len(posts) - 1
         return redirect(url_for("post", post_id=post_id))
     return render_template("new.html")
-
