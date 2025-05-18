@@ -1,14 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for
 
 
-app = Flask(__name__)  # __name__ doğru şekilde yazıldı
-
+app = Flask(__name__)
 
 posts = []
 
 
 @app.route('/')
 def index():
+    if not posts:
+        return render_template("index.html", posts=posts,
+                               message="Henüz yazı yok")
     return render_template("index.html", posts=posts)
 
 
@@ -31,5 +33,7 @@ def new_post():
         title = request.form["title"]
         content = request.form["content"]
         posts.append({"title": title, "content": content})
-        return redirect(url_for("index"))
+        post_id = len(posts) - 1
+        return redirect(url_for("post", post_id=post_id))  # index yerine burası
     return render_template("new.html")
+

@@ -31,12 +31,16 @@ def test_create_post():
 
 def test_post_view():
     tester = app.test_client()
-    tester.post(
+    response = tester.post(
         '/new',
         data=dict(title="Yeni Post", content="Detay içerik"),
-        follow_redirects=True
+        follow_redirects=False
     )
-    response = tester.get('/post/0')
+
+    location = response.headers['Location']  # /post/0 gibi
+    post_id = location.split('/post/')[-1]
+
+    response = tester.get(f'/post/{post_id}')
     assert response.status_code == 200
     assert 'Yeni Post' in response.data.decode('utf-8')
 
