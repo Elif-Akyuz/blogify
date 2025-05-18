@@ -1,5 +1,7 @@
 import sys
 import os
+from app import app
+
 
 sys.path.insert(
     0,
@@ -7,8 +9,6 @@ sys.path.insert(
         os.path.join(os.path.dirname(__file__), '..')
     )
 )
-
-from app import app
 
 
 def test_index():
