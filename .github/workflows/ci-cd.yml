@@ -73,6 +73,10 @@ jobs:
     needs: test
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+      url: ${{ github.ref_name == 'main' && 'https://blogify-prod.onrender.com' || 'https://blogify-staging.onrender.com' }}
+
     steps:
       - name: Set Branch Variable
         id: vars
