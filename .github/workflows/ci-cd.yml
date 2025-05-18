@@ -32,8 +32,7 @@ jobs:
           pip install flake8
 
       - name: Run flake8
-        run: |
-          flake8 app tests
+        run: flake8 app tests
 
   test:
     name: Run Tests with Coverage and Report
@@ -64,8 +63,7 @@ jobs:
           pip install pytest pytest-html pytest-cov
 
       - name: Run tests with coverage and generate report
-        run: |
-          pytest --cov=app --cov-report=term-missing --html=report.html
+        run: pytest --cov=app --cov-report=term-missing --html=report.html
 
       - name: Upload HTML Test Report
         uses: actions/upload-artifact@v3
@@ -78,9 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    environment:
-      name: ${{ github.event.inputs.branch == 'main' || github.ref_name == 'main' && 'production' || 'staging' }}
-      url: ${{ github.ref_name == 'main' && 'https://blogify-prod.onrender.com' || 'https://blogify-staging.onrender.com' }}
+
     steps:
       - name: Set Branch Variable
         id: vars
@@ -90,9 +86,9 @@ jobs:
         run: |
           BRANCH="${{ steps.vars.outputs.branch }}"
           if [[ "$BRANCH" == "main" && -z "${{ secrets.RENDER_DEPLOY_HOOK_PROD }}" ]]; then
-            echo "Missing production hook"; exit 1
+            echo "Missing production deploy hook"; exit 1
           elif [[ "$BRANCH" == "develop" && -z "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}" ]]; then
-            echo "Missing staging hook"; exit 1
+            echo "Missing staging deploy hook"; exit 1
           fi
 
       - name: Deploying...
@@ -104,6 +100,8 @@ jobs:
           elif [[ "$BRANCH" == "develop" ]]; then
             echo "Deploying to STAGING"
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}"
+          else
+            echo "Branch $BRANCH is not configured for deployment"; exit 1
           fi
 
           echo "Waiting for service to warm up..."
@@ -113,6 +111,7 @@ jobs:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
     needs: deploy
+
     steps:
       - name: Set Branch Variable
         id: vars
@@ -126,18 +125,18 @@ jobs:
           elif [[ "$BRANCH" == "develop" ]]; then
             URL="https://blogify-staging.onrender.com/health"
           else
-            echo "No healthcheck URL for branch: $BRANCH"; exit 1
+            echo "No healthcheck URL configured for branch: $BRANCH"; exit 1
           fi
 
           echo "Waiting for service to warm up..."
           sleep 40
 
           echo "Checking service at $URL..."
-          code=$(curl --write-out '%{http_code}' --silent --output /dev/null $URL)
+          status_code=$(curl --write-out '%{http_code}' --silent --output /dev/null "$URL")
 
-          if [[ "$code" == "200" ]]; then
+          if [[ "$status_code" == "200" ]]; then
             echo "Service is healthy ✅"
           else
-            echo "Service healthcheck failed ❌"
+            echo "Service healthcheck failed with status $status_code ❌"
             exit 1
           fi
