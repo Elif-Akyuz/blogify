@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Blog Yazıları</h2>
+  <h2>Gülistan</h2>
   <ul>
     {% for post in posts %}
       <li><a href="{{ url_for('post', post_id=loop.index0) }}">{{ post.title }}</a></li>
